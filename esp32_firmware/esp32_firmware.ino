@@ -17,20 +17,21 @@
  */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <ESP32Servo.h>
 #include <DHT.h>
 
 // ─── WiFi ─────────────────────────────────────────────────────────────────────
-const char* WIFI_SSID     = "YOUR_WIFI_SSID";
-const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char* WIFI_SSID     = "iPhone";
+const char* WIFI_PASSWORD = "12345678";
 
-// ─── MQTT broker ──────────────────────────────────────────────────────────────
-const char* MQTT_BROKER   = "192.168.1.x";   // your broker IP
-const int   MQTT_PORT     = 1883;
-const char* MQTT_USER     = "";              // leave empty if no auth
-const char* MQTT_PASS     = "";
+// ─── MQTT broker (HiveMQ Cloud) ───────────────────────────────────────────────
+const char* MQTT_BROKER   = "1ea253cb7b71449db2137ae6ebc629f8.s1.eu.hivemq.cloud";
+const int   MQTT_PORT     = 8883;
+const char* MQTT_USER     = "ranim";
+const char* MQTT_PASS     = "Ranim123";
 const char* CLIENT_ID     = "esp32-sensor-node";
 
 // ─── MQTT topics ──────────────────────────────────────────────────────────────
@@ -42,8 +43,7 @@ const char* TOPIC_SERVO   = "esp32/servo/command";
 #define DHT_TYPE      DHT22
 #define FLAME_PIN     34    // active-LOW: LOW = flame detected
 #define GAS_PIN       35    // analog MQ-2/MQ-5
-#define 
-  27    // PIR: HIGH = motion
+#define MOVEMENT_PIN  27    // PIR: HIGH = motion
 #define SERVO_PIN     18
 
 // ─── Thresholds ───────────────────────────────────────────────────────────────
@@ -53,11 +53,11 @@ const char* TOPIC_SERVO   = "esp32/servo/command";
 #define PUBLISH_INTERVAL_MS  2000   // publish every 2 s
 
 // ─── Globals ──────────────────────────────────────────────────────────────────
-WiFiClient   wifiClient;
-PubSubClient mqtt(wifiClient);
-DHT          dht(DHT_PIN, DHT_TYPE);
-Servo        doorServo;
-unsigned long lastPublish = 0;
+WiFiClientSecure wifiClient;
+PubSubClient     mqtt(wifiClient);
+DHT              dht(DHT_PIN, DHT_TYPE);
+Servo            doorServo;
+unsigned long    lastPublish = 0;
 
 // ─── MQTT message callback (servo commands) ───────────────────────────────────
 void onMqttMessage(const char* topic, byte* payload, unsigned int length) {
@@ -88,9 +88,7 @@ void connectWifi() {
 void connectMqtt() {
   while (!mqtt.connected()) {
     Serial.print("[mqtt] connecting…");
-    bool ok = strlen(MQTT_USER)
-      ? mqtt.connect(CLIENT_ID, MQTT_USER, MQTT_PASS)
-      : mqtt.connect(CLIENT_ID);
+    bool ok = mqtt.connect(CLIENT_ID, MQTT_USER, MQTT_PASS);
 
     if (ok) {
       Serial.println(" connected");
@@ -138,9 +136,11 @@ void setup() {
 
   connectWifi();
 
+  wifiClient.setInsecure(); // skip CA verification — fine for this project
   mqtt.setServer(MQTT_BROKER, MQTT_PORT);
   mqtt.setCallback(onMqttMessage);
   mqtt.setKeepAlive(30);
+  mqtt.setBufferSize(512);
 }
 
 // ─── Loop ─────────────────────────────────────────────────────────────────────

@@ -94,22 +94,25 @@ export default function App() {
             </div>
             <div className="space-y-3 text-sm text-gray-400">
               <p>
-                Create a <code className="rounded bg-gray-800 px-1 text-violet-400">backend/.env</code> and a{' '}
-                <code className="rounded bg-gray-800 px-1 text-violet-400">.env</code> in the project root.
+                Set env vars in <code className="rounded bg-gray-800 px-1 text-violet-400">backend/.env</code> and{' '}
+                <code className="rounded bg-gray-800 px-1 text-violet-400">.env.local</code> (frontend root).
               </p>
               <pre className="overflow-x-auto rounded-lg bg-gray-800 p-3 text-xs text-gray-300">{`# backend/.env
-ESP32_URL=http://192.168.x.x
+MQTT_BROKER_URL=mqtts://user:pass@host:8883
+MQTT_SENSOR_TOPIC=esp32/sensors
+MQTT_SERVO_TOPIC=esp32/servo/command
+PORT=4000
 VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
 
-# .env (frontend)
-VITE_BACKEND_URL=http://localhost:4000
-VITE_VAPID_PUBLIC_KEY=...`}</pre>
+# .env.local (frontend)
+VITE_BACKEND_URL=https://your-backend.railway.app`}</pre>
               <p>Run <code className="text-violet-400">npm run gen-vapid</code> inside <code>backend/</code> to generate VAPID keys.</p>
               <div className="rounded-lg bg-gray-800 p-3">
                 <p className="text-xs text-gray-500">Backend endpoints</p>
                 <ul className="mt-1 space-y-1 text-xs text-gray-300">
                   <li><code className="text-violet-400">GET</code>  /api/events — SSE sensor stream</li>
+                  <li><code className="text-violet-400">POST</code> /api/servo/:action — open / close</li>
                   <li><code className="text-emerald-400">POST</code> /api/push/subscribe — register notifications</li>
                   <li><code className="text-rose-400">DELETE</code> /api/push/subscribe — unregister</li>
                 </ul>

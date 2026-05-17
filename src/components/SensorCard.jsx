@@ -139,12 +139,12 @@ export default function SensorCard({ type, value, gasAlert }) {
         <span className="text-sm font-medium text-gray-400">{cfg.label}</span>
       </div>
 
-      <div className="flex items-end gap-1">
-        <span className={`text-4xl font-bold tabular-nums leading-none ${cfg.color(value, alert)}`}>
+      <div className="flex items-end gap-1 overflow-hidden">
+        <span className={`truncate text-2xl font-bold tabular-nums leading-none sm:text-3xl ${cfg.color(value, alert)}`}>
           {cfg.format(value, alert)}
         </span>
         {cfg.unit && (
-          <span className="mb-1 text-lg font-medium text-gray-500">{cfg.unit}</span>
+          <span className="mb-0.5 shrink-0 text-base font-medium text-gray-500">{cfg.unit}</span>
         )}
       </div>
 
